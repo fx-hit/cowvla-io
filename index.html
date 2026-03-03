@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoWVLA | CVPR 2026 Project Page</title>
+  <meta
+    name="description"
+    content="CoWVLA is a CVPR 2026 project that unifies world-model temporal reasoning with disentangled latent motion for vision-language-action learning."
+  >
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="#top">CoWVLA</a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#demos">Demos</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero reveal">
+        <div class="hero-copy">
+          <p class="eyebrow">CVPR 2026</p>
+          <h1>Chain of World: World Model Thinking in Latent Motion</h1>
+          <p class="hero-summary">
+            CoWVLA teaches a VLA model to reason through a compact chain of latent motion,
+            preserving world-model temporal structure without spending capacity on redundant
+            background reconstruction.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button disabled" href="#" aria-disabled="true" onclick="return false;">Paper Link Placeholder</a>
+            <a class="button" href="https://github.com/fx-hit/CoWVLA" target="_blank" rel="noopener noreferrer">Code</a>
+            <a class="button" href="#demos">View Demos</a>
+          </div>
+
+          <div class="author-block">
+            <p>
+              Fuxiang Yang<sup>1,2</sup>,
+              Donglin Di<sup>2</sup>,
+              Lulu Tang<sup>3,6</sup>,
+              Xuancheng Zhang<sup>2</sup>,
+              Lei Fan<sup>4</sup>,
+              Hao Li<sup>2</sup>,
+              Wei Chen<sup>2</sup>,
+              Tonghua Su<sup>1,5</sup>,
+              Baorui Ma<sup>2</sup>
+            </p>
+            <p class="affiliations">
+              <span><sup>1</sup>Harbin Institute of Technology</span>
+              <span><sup>2</sup>Li Auto</span>
+              <span><sup>3</sup>BAAI</span>
+              <span><sup>4</sup>UNSW</span>
+              <span><sup>5</sup>Chongqing Research Institute of HIT</span>
+              <span><sup>6</sup>Peking University</span>
+            </p>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="metric-card">
+            <span class="metric-value">236,543</span>
+            <span class="metric-label">robot videos for training</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value">95.6%</span>
+            <span class="metric-label">LIBERO average success</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value">76.0%</span>
+            <span class="metric-label">SimplerEnv average success</span>
+          </div>
+          <div class="metric-card accent-card">
+            <span class="metric-value">World Model + Latent Motion</span>
+            <span class="metric-label">continuous reasoning, compact dynamics</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section reveal" id="abstract">
+        <div class="section-heading">
+          <p class="eyebrow">Overview</p>
+          <h2>Abstract</h2>
+        </div>
+
+        <div class="overview-grid">
+          <div class="prose-card">
+            <p>
+              Vision-language-action models benefit from temporal prediction, but explicit future-frame
+              modeling often wastes capacity on static background reconstruction. Pure latent-action
+              approaches are compact, yet they typically model only short transitions and miss richer
+              world dynamics.
+            </p>
+            <p>
+              CoWVLA bridges these two lines. It first disentangles structure and motion with a
+              pretrained video VAE, then pretrains a VLA decoder to infer a continuous latent motion
+              chain from language plus the first frame, and finally co-fine-tunes latent dynamics with
+              sparse keyframes and FAST action tokens in one autoregressive decoder.
+            </p>
+            <p>
+              The result is a dynamics-aware VLA that keeps the world-model benefits of temporal
+              reasoning while remaining compact, interpretable, and effective on robotic manipulation.
+            </p>
+          </div>
+
+          <div class="fact-stack">
+            <article class="fact-card">
+              <h3>Key Idea</h3>
+              <p>Reason over latent motion chains instead of reconstructing every future background pixel.</p>
+            </article>
+            <article class="fact-card">
+              <h3>Pretraining Signal</h3>
+              <p>Instruction + first frame supervise both terminal-frame prediction and continuous motion latent prediction.</p>
+            </article>
+            <article class="fact-card">
+              <h3>Action Alignment</h3>
+              <p>Co-fine-tuning ties sparse visual checkpoints and discretized action chunks to one shared dynamics token.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tint reveal" id="method">
+        <div class="section-heading">
+          <p class="eyebrow">Method</p>
+          <h2>Three-stage training pipeline</h2>
+        </div>
+
+        <div class="figure-frame figure-frame-wide">
+          <img
+            src="assets/images/arch.jpg"
+            alt="Overview of the CoWVLA framework."
+          >
+          <p class="figure-caption">
+            CoWVLA combines a latent motion extractor with a unified VLA decoder. The model reasons with a dedicated motion query token and aligns latent dynamics with action generation.
+          </p>
+        </div>
+
+        <div class="timeline-grid">
+          <article class="timeline-card">
+            <p class="timeline-index">01</p>
+            <h3>Disentangle structure and motion</h3>
+            <p>
+              A pretrained VidTwin-based video VAE decomposes each clip into structure latent
+              and motion latent, isolating dynamic information from static scene content.
+            </p>
+          </article>
+          <article class="timeline-card">
+            <p class="timeline-index">02</p>
+            <h3>Pretrain to think in latent motion</h3>
+            <p>
+              From an instruction and the initial frame, the decoder predicts the terminal frame
+              while inferring a continuous latent motion chain through one learnable query token.
+            </p>
+          </article>
+          <article class="timeline-card">
+            <p class="timeline-index">03</p>
+            <h3>Co-fine-tune actions with sparse keyframes</h3>
+            <p>
+              Alternating keyframes and FAST action chunks keep long-horizon dynamics explicit,
+              aligning latent motion reasoning with stable action prediction.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal" id="results">
+        <div class="section-heading">
+          <p class="eyebrow">Results</p>
+          <h2>State-of-the-art across simulation benchmarks</h2>
+        </div>
+
+        <div class="results-strip">
+          <article class="result-highlight">
+            <span class="result-benchmark">LIBERO</span>
+            <strong>95.6%</strong>
+            <p>Best average success rate, improving over UniVLA by 0.6 points.</p>
+          </article>
+          <article class="result-highlight">
+            <span class="result-benchmark">SimplerEnv-WidowX</span>
+            <strong>76.0%</strong>
+            <p>Best average success rate, outperforming FlowVLA by 2.0 points.</p>
+          </article>
+          <article class="result-highlight">
+            <span class="result-benchmark">Cross-domain Stability</span>
+            <strong>Balanced</strong>
+            <p>Strong performance on both world-model-heavy and real-data-transfer settings.</p>
+          </article>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Paradigm</th>
+                <th>LIBERO Avg.</th>
+                <th>SimplerEnv Avg.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>OpenVLA</td>
+                <td>Direct action</td>
+                <td>76.5</td>
+                <td>1.0</td>
+              </tr>
+              <tr>
+                <td>villa-X</td>
+                <td>Latent action</td>
+                <td>90.1</td>
+                <td>62.5</td>
+              </tr>
+              <tr>
+                <td>TLA</td>
+                <td>Latent action</td>
+                <td>95.2</td>
+                <td>48.0</td>
+              </tr>
+              <tr>
+                <td>UniVLA</td>
+                <td>World model</td>
+                <td>95.0</td>
+                <td>68.7</td>
+              </tr>
+              <tr>
+                <td>FlowVLA</td>
+                <td>World model</td>
+                <td>88.1</td>
+                <td>74.0</td>
+              </tr>
+              <tr class="ours-row">
+                <td>CoWVLA</td>
+                <td>World model + latent motion</td>
+                <td>95.6</td>
+                <td>76.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="analysis-grid">
+          <article class="figure-frame">
+            <img
+              src="assets/images/structure_motion_recon.png"
+              alt="Visualization of disentangled structure and motion latents."
+            >
+            <p class="figure-caption">
+              Motion-only and structure-only reconstructions show that CoWVLA isolates dynamic cues while preserving global layout.
+            </p>
+          </article>
+          <article class="figure-frame">
+            <img
+              src="assets/images/future_reasoning.png"
+              alt="Comparison of future-frame prediction strategies."
+            >
+            <p class="figure-caption">
+              Compared with world-model or single-goal prediction baselines, CoWVLA produces more instruction-aligned future dynamics.
+            </p>
+          </article>
+        </div>
+
+        <div class="analysis-grid analysis-grid-secondary">
+          <article class="figure-frame">
+            <img
+              src="assets/images/libero_structure_motion.png"
+              alt="Cross reconstruction visualization on LIBERO."
+            >
+            <p class="figure-caption">
+              Cross reconstruction highlights motion-affected regions, showing clean separation between static structure and robot motion.
+            </p>
+          </article>
+          <article class="figure-frame">
+            <img
+              src="assets/images/robot_and_camera.jpg"
+              alt="Real robot and camera setup."
+            >
+            <p class="figure-caption">
+              Real-world deployment setup used for robot data collection and live VLA evaluation.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tint reveal" id="demos">
+        <div class="section-heading section-heading-split">
+          <div>
+            <p class="eyebrow">Supplementary Demos</p>
+            <h2>Latent motion, real-world data, and deployment videos</h2>
+          </div>
+          <div class="filter-row" aria-label="Demo filters">
+            <button class="filter-chip is-active" type="button" data-filter="all">All</button>
+            <button class="filter-chip" type="button" data-filter="latent">Latent Motion</button>
+            <button class="filter-chip" type="button" data-filter="collection">Collected Data</button>
+            <button class="filter-chip" type="button" data-filter="deploy">Deployment</button>
+          </div>
+        </div>
+
+        <div class="demo-stack">
+          <section class="demo-section" data-demo-group="latent">
+            <h3>1. Latent_Motion_Extractor_cross_recon</h3>
+            <p class="demo-note">
+              This group contains video VAE cross-reconstruction results. Each video shows three
+              horizontally concatenated clips: a structure-latent source on the left, a motion-latent
+              source in the middle, and the reconstructed result on the right.
+            </p>
+            <div class="demo-grid">
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_01.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_02.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_03.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_04.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_05.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/latent_motion/video_06.mp4"></video></article>
+            </div>
+          </section>
+
+          <section class="demo-section" data-demo-group="collection">
+            <h3>2. real_robot / collected_data</h3>
+            <p class="demo-note">
+              This group contains two episodes from real-world data collection, recording the robot's
+              observations during actual task execution.
+            </p>
+            <div class="demo-grid">
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/collected_data/video_01.mp4"></video></article>
+              <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/collected_data/video_02.mp4"></video></article>
+            </div>
+          </section>
+
+          <section class="demo-section" data-demo-group="deploy">
+            <h3>3. real_robot / realtime_deploy</h3>
+            <p class="demo-note">
+              This group contains recordings from the real-time deployment of the VLA model
+              controlling the robot arm.
+            </p>
+
+            <div class="demo-subgroup">
+              <h4 class="demo-subtitle">3.1 cameraview_phone</h4>
+              <p class="demo-note">
+                Side phone recordings of the robot arm.
+              </p>
+              <div class="demo-grid">
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_phone/video_04.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_phone/video_05.mp4"></video></article>
+              </div>
+            </div>
+
+            <div class="demo-subgroup">
+              <h4 class="demo-subtitle">3.2 cameraview_realscene</h4>
+              <p class="demo-note">
+                Real-scene camera view used as input to the cloud-hosted VLA model. Each frame is sent
+                to the model, which predicts a sequence of 10 actions, executes them, and then requests
+                the next frame, leading to a choppy appearance.
+              </p>
+              <div class="demo-grid demo-grid-three">
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_01.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_02.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_03.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_04.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_06.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/cameraview_realscene/video_07.mp4"></video></article>
+              </div>
+            </div>
+
+            <div class="demo-subgroup">
+              <h4 class="demo-subtitle">3.3 merged</h4>
+              <p class="demo-note">
+                Side-by-side merged videos of the phone view and the real-scene camera view.
+              </p>
+              <div class="demo-grid">
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/merged/video_01.mp4"></video></article>
+                <article class="demo-card"><video controls muted playsinline preload="metadata" src="assets/videos/real_robot/merged/video_02.mp4"></video></article>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="section reveal" id="citation">
+        <div class="section-heading">
+          <p class="eyebrow">Reference</p>
+          <h2>Citation</h2>
+        </div>
+
+        <div class="citation-card">
+          <pre><code>@inproceedings{yang2026cowvla,
+  title     = {Chain of World: World Model Thinking in Latent Motion},
+  author    = {Yang, Fuxiang and Di, Donglin and Tang, Lulu and Zhang, Xuancheng and Fan, Lei and Li, Hao and Chen, Wei and Su, Tonghua and Ma, Baorui},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2026}
+}</code></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>
